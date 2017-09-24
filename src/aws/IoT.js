@@ -57,6 +57,10 @@ const createDevice = function (credentials, cb) {
         const code = shadow.get(thing);
         console.log("GET CODE:" + code);
     }, 3000);
+
+    return {
+        device: shadow
+    };
 };
 
 const devices = [];
@@ -68,27 +72,5 @@ exports._update = function (credentials) {
                 onUpdate(s)();
             }));
         };
-    };
-};
-
-exports._source = function(send) {
-    return function () {
-        setInterval(function() {
-            const now = Date.now();
-            console.log ("sending: " + now);
-            send(now.toString())();
-        }, 4000.0);
-        return {};
-    };
-};
-
-exports.times2 = function(send) {
-    return function () {
-        setInterval(function() {
-            const now = Date.now();
-            console.log ("sending: " + now);
-            send(now.toString())();
-        }, 4000.0);
-        return {};
     };
 };

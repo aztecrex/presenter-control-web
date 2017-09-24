@@ -1,16 +1,14 @@
 module AWS.IoT where
 
-import Prelude
-import Control.Monad.Eff
-import Control.Monad.Eff.Exception
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Console
-import Control.Monad.Aff
-import Signal
-import Signal.Channel
-import Signal.Time
+import Prelude (Unit, bind, discard, pure, void, ($))
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Exception (EXCEPTION)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Aff (Aff, launchAff)
+import Signal (Signal, runSignal, (~>))
+import Signal.Channel (CHANNEL, channel, send, subscribe)
 import AWS.Types (AWS, Credentials)
-import AWS
+import AWS (credentials)
 
 -- foreign import data Update :: Type
 foreign import _update :: forall eff.
@@ -45,19 +43,5 @@ chupdates = do
     void $ launchAff $ do
         creds <- credentials
         liftEff $ _update creds sink
-    pure $ subscribe ch
-
-
-foreign import times2 :: forall eff.  (String -> Eff eff Unit) -> Eff eff Unit
-updates2 :: forall eff.
-      Eff
-        ( channel :: CHANNEL, aws :: AWS
-        | eff
-        )
-        (Signal String)
-updates2 = do
-    ch <- channel "one"
-    let sink = send ch :: forall e. String -> Eff (channel :: CHANNEL | e) Unit
-    times2 sink
     pure $ subscribe ch
 
