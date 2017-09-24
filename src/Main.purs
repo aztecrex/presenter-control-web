@@ -3,6 +3,7 @@ module Main where
 import Prelude (Unit, bind, discard, ($), pure, void, unit)
 import Data.Maybe (Maybe(..))
 import Data.Either(Either(..))
+import Data.Lens ((^.))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
@@ -13,7 +14,7 @@ import Pux.Renderer.React (renderToDOM)
 import UI.View (view)
 import UI.Event (Event(..))
 import UI.Control (reduce)
-import Model.State (State, newState)
+import Model.State (State, newState, url, page)
 import Signal.Channel (CHANNEL)
 import AWS.Types (AWS)
 import AWS.IoT (createDevice, Device, updateDevice)
@@ -31,14 +32,12 @@ update dev url page = do
   liftEff $ updateDevice dev url page
   pure Nothing
 
-effects :: forall eff. Device -> Event -> State -> Array (Aff (aws :: AWS, exception :: EXCEPTION | eff) (Maybe Event))
-effects device Next _ = [update device "someplace" 1000]
-effects device Previous _ = [update device "someplace" 10]
-effects device Restart _  = [update device "someplace" 1]
-effects device _ _ = []
+effects :: forall eff. Device -> State -> Array (Aff (aws :: AWS, exception :: EXCEPTION | eff) (Maybe Event))
+effects device s = [update device (s ^. url) (s ^. page)]
 
 makeFoldP :: forall eff. Device -> Event -> State -> EffModel State Event (aws :: AWS, exception :: EXCEPTION | eff)
-makeFoldP device ev s = { state: reduce ev s, effects: effects device ev s }
+makeFoldP device ev s = { state: s', effects: effects device s' }
+  where s' = reduce ev s
 
 main :: Eff (CoreEffects AppEffects) Unit
 main = do

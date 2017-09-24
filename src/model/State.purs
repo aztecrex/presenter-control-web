@@ -2,7 +2,8 @@ module Model.State
 (
   State,
   newState,
-  page
+  page,
+  url
 )
 where
 
@@ -48,6 +49,13 @@ _page = prop (SProxy :: SProxy "_page")
 
 page :: Lens' State Int
 page = _record <<< _page
+
+_url :: forall r. Lens' { _url :: String | r } String
+_url = prop (SProxy :: SProxy "_url")
+
+url :: Lens' State String
+url = _record <<< _url
+
 
 newState :: State
 newState = State
