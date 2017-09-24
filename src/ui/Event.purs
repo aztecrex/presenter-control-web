@@ -8,7 +8,6 @@ data Event =  Next
             | Previous
             | Restart
             | Content String
-            | RequestContent
             | Noop
             | Log String
 

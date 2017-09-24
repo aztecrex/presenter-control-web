@@ -41,7 +41,8 @@ module.exports = {
     contentBase: path.resolve(__dirname, 'build'),
     port: 4008,
     stats: 'errors-only',
-    publicPath: '/'
+    publicPath: '/',
+    openPage: '/control.html'
   },
 
   entry: './src/entry.js',
@@ -107,8 +108,9 @@ module.exports = {
       debug: true
     }),
     new HtmlWebpackPlugin({
-      title: 'Welcome to the Working Week',
-      template: path.join(__dirname, "src", "index.ejs"),
+      title: 'Presentation Control',
+      template: path.join(__dirname, "src", "control.ejs"),
+      filename: 'control.html'
     }),
 
   ].concat(plugins)
