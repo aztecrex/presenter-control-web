@@ -1,0 +1,17 @@
+{
+    "name": "presenter-viewer",
+    "set": "master",
+    "source": "https://github.com/aztecrex/package-sets.git",
+    "depends": [
+        "test-unit",
+        "pux",
+        "psci-support",
+        "prelude",
+        "eff",
+        "markdown",
+        "profunctor-lenses",
+        "affjax",
+        "aff",
+        "argonaut"
+    ]
+}

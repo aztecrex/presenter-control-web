@@ -1,0 +1,47 @@
+{
+  "name": "presenter-controller",
+  "version": "1.0.0",
+  "description": "Browser-based presentation Controller",
+  "main": "index.js",
+  "scripts": {
+    "prep": "npm install --silent && psc-package update",
+    "build": "npm test && rm -rf build && webpack --progress -p --display-error-details",
+    "start": "webpack-dev-server --open --hot --inline",
+    "compile": "pulp build",
+    "test": "pulp test",
+    "superclean": "git clean -xdf && rm -rf .psc-package",
+    "clean": "rm -rf build output",
+    "repl": "pulp repl",
+    "version": "pulp --version"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aztecrex/presenter-webui"
+  },
+  "author": "Greg Wiley <aztex.rex@jammm.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aztecrex/presenter-webui/issues"
+  },
+  "homepage": "https://github.com/aztecrex/presenter-webui",
+  "devDependencies": {
+    "aws-sdk": "^2.111.0",
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.0.0",
+    "babel-preset-es2015": "^6.24.1",
+    "file-loader": "^0.11.2",
+    "html-webpack-plugin": "^2.28.0",
+    "pulp": "^12.0.1",
+    "purescript": "^0.11.5",
+    "purescript-psa": "^0.5.1",
+    "purs-loader": "^3.0.0",
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.4.5"
+  },
+  "dependencies": {
+    "aws-iot-device-sdk": "^2.0.1",
+    "marked": "^0.3.6",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1"
+  }
+}
