@@ -51,7 +51,8 @@ const createDevice = function (credentials, cb) {
     //     cb(prefix + JSON.stringify(stateObj));
     // });
     return {
-        device: shadow
+        device: shadow,
+        thing: thing
     };
 };
 
@@ -74,7 +75,7 @@ exports._update = function (device) {
                     }
                 };
                 console.log("device: " + JSON.stringify(device))
-                device.device.update(thing, st);
+                device.device.update(device.thing, st);
             };
         };
     };

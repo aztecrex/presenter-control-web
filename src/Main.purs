@@ -1,32 +1,56 @@
 module Main where
 
-import Prelude (Unit, bind)
+import Prelude (Unit, bind, discard, ($), pure, void, unit)
+import Data.Maybe (Maybe(..))
+import Data.Either(Either(..))
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Exception (EXCEPTION)
+import Control.Monad.Aff (Aff, launchAff, liftEff')
 import Control.Monad.Eff.Console (CONSOLE)
 import Pux (CoreEffects, EffModel, start)
 import Pux.Renderer.React (renderToDOM)
 import UI.View (view)
-import UI.Event (Event)
+import UI.Event (Event(..))
 import UI.Control (reduce)
 import Model.State (State, newState)
 import Signal.Channel (CHANNEL)
 import AWS.Types (AWS)
+import AWS.IoT (createDevice, Device, updateDevice)
 
 initialState :: State
 initialState = newState
 
-type AppEffects = (console :: CONSOLE, aws :: AWS, channel :: CHANNEL)
+type AppEffects = (exception :: EXCEPTION, console :: CONSOLE, aws :: AWS, channel :: CHANNEL)
 
-foldp :: Event -> State -> EffModel State Event AppEffects
-foldp ev s = { state: reduce ev s, effects: [] }
+-- device :: forall eff. Aff (aws :: AWS | eff) Device
+-- device = createDevice
+
+update :: forall eff. Device -> String -> Int -> Aff (aws :: AWS, exception :: EXCEPTION | eff) (Maybe Event)
+update dev url page = do
+  liftEff $ updateDevice dev url page
+  pure Nothing
+
+effects :: forall eff. Device -> Event -> State -> Array (Aff (aws :: AWS, exception :: EXCEPTION | eff) (Maybe Event))
+effects device Next _ = [update device "someplace" 1000]
+effects device Previous _ = [update device "someplace" 10]
+effects device Restart _  = [update device "someplace" 1]
+effects device _ _ = []
+
+makeFoldP :: forall eff. Device -> Event -> State -> EffModel State Event (aws :: AWS, exception :: EXCEPTION | eff)
+makeFoldP device ev s = { state: reduce ev s, effects: effects device ev s }
 
 main :: Eff (CoreEffects AppEffects) Unit
 main = do
-  app <- start
-    { initialState
-    , view
-    , foldp
-    , inputs: [ ]
-    }
-  renderToDOM "#app" app.markup app.input
+  void $ launchAff $ do
+    device <- createDevice
+    eitherApp <- liftEff' $ start
+      { initialState
+        , view
+        , foldp: makeFoldP device
+        , inputs: []
+      }
+    case eitherApp of
+      Left _ -> pure $ Right unit
+      Right app -> liftEff' $ renderToDOM "#app" app.markup app.input
 
