@@ -26,69 +26,57 @@ const createDevice = function (credentials, cb) {
         sessionToken: credentials.SessionToken
     });
     shadow.on('connect', function () {
-        shadow.subscribe(theTopic)
-        cb("connected, subscribed to '" + theTopic + "'");
         if (!registered) {
             shadow.register(thing, {
                 persistentSubscribe: true
             });
-            cb("registered thing '" + thing + "'");
+            console.log ("connected");
             registered = true;
         }
     });
     shadow.on('reconnect', function () {
-        cb("reconnect")
+        console.log("reconnected")
     });
-    shadow.on('message', function (topic, payload) {
-        cb("message on '" + topic + "': " + payload.toString())
-    });
-    shadow.on('delta', function (name, stateObj) {
-        cb("delta '" + name + "': " + JSON.stringify(stateObj));
-    });
-    shadow.on('status', function (name, type, token, stateObj) {
-        const prefix = "status " +
-              name + ", " +
-              type + ", " +
-              token + ": "
-        cb(prefix + JSON.stringify(stateObj));
-    });
-
-    setTimeout( function () {
-        const code = shadow.get(thing);
-        console.log("GET CODE:" + code);
-    }, 3000);
+    // shadow.on('message', function (topic, payload) {
+    //     cb("message on '" + topic + "': " + payload.toString())
+    // });
+    // shadow.on('delta', function (name, stateObj) {
+    //     cb("delta '" + name + "': " + JSON.stringify(stateObj));
+    // });
+    // shadow.on('status', function (name, type, token, stateObj) {
+    //     const prefix = "status " +
+    //           name + ", " +
+    //           type + ", " +
+    //           token + ": "
+    //     cb(prefix + JSON.stringify(stateObj));
+    // });
+    return {
+        device: shadow,
+        thing: thing
+    };
 };
 
-const devices = [];
+exports._create = function (credentials) {
+    return function () {
+        return createDevice(credentials);
+    };
+};
 
-exports._update = function (credentials) {
-    return function (onUpdate) {
-        return function () {
-            devices.push(createDevice(credentials, function (s) {
-                onUpdate(s)();
-            }));
+exports._update = function (device) {
+    return function (url) {
+        return function (page) {
+            return function () {
+                const st = {
+                    state: {
+                        desired: {
+                            url: url,
+                            page: page
+                        }
+                    }
+                };
+                console.log("device: " + JSON.stringify(device))
+                device.device.update(device.thing, st);
+            };
         };
-    };
-};
-
-exports._source = function(send) {
-    return function () {
-        setInterval(function() {
-            const now = Date.now();
-            console.log ("sending: " + now);
-            send(now.toString())();
-        }, 4000.0);
-        return {};
-    };
-};
-
-exports.times2 = function(send) {
-    return function () {
-        setInterval(function() {
-            const now = Date.now();
-            console.log ("sending: " + now);
-            send(now.toString())();
-        }, 4000.0);
-        return {};
     };
 };

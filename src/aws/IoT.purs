@@ -1,63 +1,30 @@
-module AWS.IoT where
+module AWS.IoT (createDevice, Device, updateDevice) where
 
-import Prelude
-import Control.Monad.Eff
-import Control.Monad.Eff.Exception
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Console
-import Control.Monad.Aff
-import Signal
-import Signal.Channel
-import Signal.Time
+import Prelude (Unit, bind, discard, pure, void, ($))
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Exception (EXCEPTION)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Aff (Aff, launchAff)
+import Signal (Signal, runSignal, (~>))
+import Signal.Channel (CHANNEL, channel, send, subscribe)
 import AWS.Types (AWS, Credentials)
-import AWS
+import AWS (credentials)
 
--- foreign import data Update :: Type
-foreign import _update :: forall eff.
-    Credentials
-    -> (String -> Eff (aws :: AWS | eff) Unit)
+
+foreign import data Device :: Type
+
+foreign import  _create :: forall eff. Credentials -> Eff eff Device
+
+createDevice :: forall eff. Aff (aws :: AWS | eff ) Device
+createDevice = do
+  creds <- credentials
+  liftEff $ _create creds
+
+foreign import _update :: forall eff. Device -> String -> Int -> Eff eff Unit
+
+updateDevice :: forall eff.
+    Device
+    -> String
+    -> Int
     -> Eff (aws :: AWS | eff) Unit
-
-updates :: forall eff.
-    (String -> Eff (channel :: CHANNEL, aws :: AWS | eff) Unit)
-    -> Aff
-        ( channel :: CHANNEL, aws :: AWS
-        | eff
-        )
-        Unit
-updates dest = do
-    creds <- credentials
-    ch <- liftEff $ channel "init"
-    let sink = send ch
-    liftEff $ _update creds sink
-    liftEff $ runSignal $ subscribe ch ~> dest
-    -- pure unit
-
-chupdates :: forall eff.
-    Eff
-        ( channel :: CHANNEL, aws :: AWS, exception :: EXCEPTION
-        | eff
-        )
-        (Signal String)
-chupdates = do
-    ch <- channel "init"
-    let sink = send ch
-    void $ launchAff $ do
-        creds <- credentials
-        liftEff $ _update creds sink
-    pure $ subscribe ch
-
-
-foreign import times2 :: forall eff.  (String -> Eff eff Unit) -> Eff eff Unit
-updates2 :: forall eff.
-      Eff
-        ( channel :: CHANNEL, aws :: AWS
-        | eff
-        )
-        (Signal String)
-updates2 = do
-    ch <- channel "one"
-    let sink = send ch :: forall e. String -> Eff (channel :: CHANNEL | e) Unit
-    times2 sink
-    pure $ subscribe ch
-
+updateDevice = _update
