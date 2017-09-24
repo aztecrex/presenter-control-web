@@ -1,0 +1,15 @@
+aws-configuration.js
+
+.psc-ide-port
+
+
+.psc-package
+.psci_modules
+build
+node_modules
+output
+npm-debug.log
+
+bundle.js
+secrets.deploy
+
