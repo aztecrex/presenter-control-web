@@ -4,7 +4,7 @@ import Prelude (Unit, bind, discard, ($), pure, void, unit)
 import Data.Maybe (Maybe(..))
 import Data.Either(Either(..))
 import Data.Lens ((^.))
-import Data.String (split, Pattern(..))
+import Data.String (split, Pattern(..), trim)
 import Data.Foldable (intercalate)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
@@ -42,7 +42,7 @@ stEffects device s = [update device (s ^. url) (s ^. page)]
 requestPresentations :: forall eff. Aff (aws :: AWS, exception :: EXCEPTION | eff) (Maybe Event)
 requestPresentations = do
   presentations <- fetch "presentations.txt"
-  pure $ Just $ Presentations $ split (Pattern "\n") presentations
+  pure $ Just $ Presentations $ split (Pattern "\n") (trim presentations)
 
 savePresentations :: forall eff. (Array String) -> Aff (aws :: AWS | eff) (Maybe Event)
 savePresentations items = do

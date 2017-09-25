@@ -94,7 +94,16 @@ exports._save = function (name) {
             return function (onSuccess) {
                 return function() {
                     console.log("DATA: saving '" + content + "' under '" + name + "'");
-                    onSuccess()();
+                        const params = {Body: content,
+                        Bucket: AWSConfig.dataStore,
+                        Key: name,
+                    }
+                    S3.putObject(params, function (err, data) {
+                        if (err) {
+                            onError(err)();
+                        }
+                        onSuccess({})();
+                    });
                 }
             }
         };
