@@ -3,13 +3,13 @@ module UI.View (view) where
 import Prelude (const, discard, show, ($), (<>))
 import Data.Maybe (maybe)
 import Text.Smolder.Markup (text, (#!), (!))
-import Text.Smolder.HTML.Attributes (className, style)
+import Text.Smolder.HTML.Attributes (className, style, value)
 import Data.Foldable (for_)
 import Data.Lens ((^.))
-import Text.Smolder.HTML (div, p, button, br)
-import Pux.DOM.Events (onClick)
+import Text.Smolder.HTML (div, p, button, br, h2, input)
+import Pux.DOM.Events (onClick, onChange, targetValue)
 import Pux.DOM.HTML (HTML)
-import Model.State (State, presentations)
+import Model.State (State, presentations, presentationInput)
 import UI.Event(Event(..))
 
 pbutton :: String -> HTML Event
@@ -21,8 +21,15 @@ view :: State -> HTML Event
 view state = do
     div $ do
         div $ do
+            h2 $ text "Slide Number"
             button ! className "btn-lg" #! onClick (const Previous) $ text "Previous"
             button ! className "btn-lg" #! onClick (const Next) $ text "Next"
             button ! className "btn-lg" #! onClick (const Restart) $ text "Restart"
         div ! style "padding-top: 2em;" $ do
+            h2 $ text "Presentation"
             for_ (state ^. presentations) pbutton
+        div ! style "padding-top: 2em;" $ do
+            input ! style "width: 65%;"
+                ! value (state ^. presentationInput)
+                #! onChange (\ev -> (PresentationInputChange (targetValue ev)))
+            button #! onClick (const AddPresentation) $ text "Add"
