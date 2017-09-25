@@ -21,7 +21,7 @@ view :: State -> HTML Event
 view state = do
     div $ do
         div $ do
-            h2 $ text "Slide Number"
+            h2 $ text "Slide"
             button ! className "btn-lg" #! onClick (const Previous) $ text "Previous"
             button ! className "btn-lg" #! onClick (const Next) $ text "Next"
             button ! className "btn-lg" #! onClick (const Restart) $ text "Restart"
