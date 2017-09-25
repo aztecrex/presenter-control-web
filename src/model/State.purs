@@ -76,9 +76,10 @@ newState = State
   {
     _page: 1,
     _url: "https://raw.githubusercontent.com/aztecrex/presenter-webui/master/README.md",
-    _presentations: [
-      "https://raw.githubusercontent.com/aztecrex/presenter-webui/master/README.md",
-      "https://raw.githubusercontent.com/aztecrex/presenter-control-web/master/README.md"
-    ],
+    -- _presentations: [
+    --   "https://raw.githubusercontent.com/aztecrex/presenter-webui/master/README.md",
+    --   "https://raw.githubusercontent.com/aztecrex/presenter-control-web/master/README.md"
+    -- ],
+    _presentations: [],
     _presentationInput: ""
   }

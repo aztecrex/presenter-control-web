@@ -26,7 +26,7 @@ view state = do
             button ! className "btn-lg" #! onClick (const Next) $ text "Next"
             button ! className "btn-lg" #! onClick (const Restart) $ text "Restart"
         div ! style "padding-top: 2em;" $ do
-            h2 $ text "Presentation"
+            h2 $ text "Presentations"
             for_ (state ^. presentations) pbutton
         div ! style "padding-top: 2em;" $ do
             input ! style "width: 65%;"

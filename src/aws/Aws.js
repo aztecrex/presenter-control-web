@@ -39,6 +39,7 @@ exports._identity = function (onError) {
     };
 };
 
+
 exports._credentials = function (identity) {
     const params = {
         IdentityId: identity
@@ -56,6 +57,55 @@ exports._credentials = function (identity) {
                     onSuccess(data.Credentials)();
                 });
             };
+        };
+    };
+};
+
+
+const S3 = new AWS.S3();
+
+exports._fetch = function (name) {
+    const fakeContent = "one\ntwo\nthree";
+    return function(onError) {
+        return function (onSuccess) {
+            return function() {
+                console.log("DATA: asked for '" + name + "'");
+                const params = {
+                    Bucket: AWSConfig.dataStore,
+                    Key: name
+                }
+                S3.getObject(params, function (err, data) {
+                    if (err) {
+                        console.log ("FETCH ERROR: " + err);
+                        onError(err)();
+                        return;
+                    }
+                    console.log("BODY: " + data.Body);
+                    onSuccess(data.Body.toString())();
+                });
+            };
+        };
+    };
+};
+
+exports._save = function (name) {
+    return function (content) {
+        return function (onError) {
+            return function (onSuccess) {
+                return function() {
+                    console.log("DATA: saving '" + content + "' under '" + name + "'");
+                        const params = {Body: content,
+                        Bucket: AWSConfig.dataStore,
+                        Key: name,
+                    }
+                    S3.putObject(params, function (err, data) {
+                        if (err) {
+                            onError(err)();
+                        }
+                        onSuccess({})();
+                    });
+                }
+            }
         };
     };
 };

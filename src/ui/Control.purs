@@ -16,4 +16,5 @@ reduce (PresentationInputChange value) s = s # presentationInput .~ value
 reduce AddPresentation s = (clearInput <<< appendLocation) s
   where clearInput s = s # presentationInput .~ ""
         appendLocation s = s # presentations <>~ [s ^. presentationInput ]
+reduce (Presentations ps) s = s # presentations .~ ps
 reduce _ s = s
