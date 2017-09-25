@@ -39,6 +39,7 @@ exports._identity = function (onError) {
     };
 };
 
+
 exports._credentials = function (identity) {
     const params = {
         IdentityId: identity
@@ -61,13 +62,27 @@ exports._credentials = function (identity) {
 };
 
 
+const S3 = new AWS.S3();
+
 exports._fetch = function (name) {
     const fakeContent = "one\ntwo\nthree";
     return function(onError) {
         return function (onSuccess) {
             return function() {
                 console.log("DATA: asked for '" + name + "'");
-                onSuccess(fakeContent)();
+                const params = {
+                    Bucket: AWSConfig.dataStore,
+                    Key: name
+                }
+                S3.getObject(params, function (err, data) {
+                    if (err) {
+                        console.log ("FETCH ERROR: " + err);
+                        onError(err)();
+                        return;
+                    }
+                    console.log("BODY: " + data.Body);
+                    onSuccess(data.Body.toString())();
+                });
             };
         };
     };
