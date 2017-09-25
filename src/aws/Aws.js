@@ -60,3 +60,29 @@ exports._credentials = function (identity) {
     };
 };
 
+
+exports._fetch = function (name) {
+    const fakeContent = "one\ntwo\nthree";
+    return function(onError) {
+        return function (onSuccess) {
+            return function() {
+                console.log("DATA: asked for '" + name + "'");
+                onSuccess(fakeContent)();
+            };
+        };
+    };
+};
+
+exports._save = function (name) {
+    return function (content) {
+        return function (onError) {
+            return function (onSuccess) {
+                return function() {
+                    console.log("DATA: saving '" + content + "' under '" + name + "'");
+                    onSuccess()();
+                }
+            }
+        };
+    };
+};
+

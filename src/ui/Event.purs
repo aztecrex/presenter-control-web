@@ -12,6 +12,9 @@ data Event =  Next
             | PresentationInputChange String
             | Noop
             | Log String
+            | FetchPresentationsRequest
+            | Presentations (Array String)
+            | SavePresentationsRequest (Array String)
 
 
 derive instance genericEvent :: Generic Event
