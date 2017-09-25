@@ -3,7 +3,8 @@ module Model.State
   State,
   newState,
   page,
-  url
+  url,
+  presentations
 )
 where
 

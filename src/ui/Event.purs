@@ -7,7 +7,7 @@ import Data.Generic (class Generic, gShow, gEq)
 data Event =  Next
             | Previous
             | Restart
-            | Content String
+            | Location String
             | Noop
             | Log String
 
