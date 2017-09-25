@@ -3,7 +3,8 @@ module Model.State
   State,
   newState,
   page,
-  url
+  url,
+  presentations
 )
 where
 
@@ -56,14 +57,19 @@ _url = prop (SProxy :: SProxy "_url")
 url :: Lens' State String
 url = _record <<< _url
 
+_presentations :: forall r. Lens' { _presentations :: (Array String) | r } (Array String)
+_presentations = prop (SProxy :: SProxy "_presentations")
+
+presentations :: Lens' State (Array String)
+presentations = _record <<< _presentations
 
 newState :: State
 newState = State
   {
     _page: 1,
-    _url: "http://the.initial.one/yeah.md",
+    _url: "https://raw.githubusercontent.com/aztecrex/presenter-webui/master/README.md",
     _presentations: [
-      "http://the.initial.one/yeah.md",
-      "http://the.other.one/letsgo.md"
+      "https://raw.githubusercontent.com/aztecrex/presenter-webui/master/README.md",
+      "https://raw.githubusercontent.com/aztecrex/presenter-control-web/master/README.md"
     ]
   }
