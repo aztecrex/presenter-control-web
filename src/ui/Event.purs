@@ -8,6 +8,8 @@ data Event =  Next
             | Previous
             | Restart
             | Location String
+            | AddPresentation
+            | PresentationInputChange String
             | Noop
             | Log String
 

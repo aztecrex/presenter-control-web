@@ -4,7 +4,8 @@ module Model.State
   newState,
   page,
   url,
-  presentations
+  presentations,
+  presentationInput
 )
 where
 
@@ -20,7 +21,8 @@ import Data.Lens.Record (prop)
 type StateR = {
   _page :: Int,
   _url :: String,
-  _presentations :: Array String
+  _presentations :: Array String,
+  _presentationInput :: String
 }
 newtype State = State StateR
 
@@ -63,6 +65,12 @@ _presentations = prop (SProxy :: SProxy "_presentations")
 presentations :: Lens' State (Array String)
 presentations = _record <<< _presentations
 
+_presentationInput :: forall r. Lens' { _presentationInput :: String | r } String
+_presentationInput = prop (SProxy :: SProxy "_presentationInput")
+
+presentationInput :: Lens' State String
+presentationInput = _record <<< _presentationInput
+
 newState :: State
 newState = State
   {
@@ -71,5 +79,6 @@ newState = State
     _presentations: [
       "https://raw.githubusercontent.com/aztecrex/presenter-webui/master/README.md",
       "https://raw.githubusercontent.com/aztecrex/presenter-control-web/master/README.md"
-    ]
+    ],
+    _presentationInput: ""
   }
