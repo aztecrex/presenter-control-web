@@ -12,6 +12,7 @@ const clientId = function () {
 const theTopic = "Banana";
 
 const createDevice = function (credentials, cb) {
+    console.log ("creationg device");
     const thing = 'Slides';
     var registered = false
     const shadow = IOT.thingShadow({
@@ -21,21 +22,37 @@ const createDevice = function (credentials, cb) {
         protocol: 'wss',
         maximumReconnectTimeMs: 8000,
         debug: true,
-        accessKeyId: credentials.AccessKeyId,
-        secretKey: credentials.SecretKey,
-        sessionToken: credentials.SessionToken
+        accessKeyId: '',
+        secretKey: '',
+        sessionToken: ''
+
+        // expired, expireTime, accessKeyId, secretAccessKey, sessionToken, expiryWindow
     });
+
+    shadow.updateWebSocketCredentials(credentials.accessKeyId, credentials.secretAccessKey, credentials.sessionToken, credentials.expiration)
     shadow.on('connect', function () {
+        console.log ("connected ---------------------------------------------------------------- ");
         if (!registered) {
             shadow.register(thing, {
                 persistentSubscribe: true
             });
-            console.log ("connected");
+            console.log("registered '" + thing + "'");
             registered = true;
+        } else {
+            console.log("already registered '" + thing + "'");
         }
     });
     shadow.on('reconnect', function () {
-        console.log("reconnected")
+        console.log("reconnected, registered=" + registered);
+        if (!registered) {
+            shadow.register(thing, {
+                persistentSubscribe: true
+            });
+            console.log("registered '" + thing + "'");
+            registered = true;
+        } else {
+            console.log("already registered '" + thing + "'");
+        }
     });
 
     return {

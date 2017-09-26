@@ -7,22 +7,29 @@ const AWSConfig = require('config/aws-configuration.js')
 const config = AWS.config;
 config.region = AWSConfig.region;
 
-const anonymousCredentials = new AWS.CognitoIdentityCredentials({
+const cognitoCredentials = new AWS.CognitoIdentityCredentials({
     IdentityPoolId: AWSConfig.poolId
 });
 
 const anonymous = function () {
-    config.credentials = anonymousCredentials;
+    config.credentials = cognitoCredentials;
 }
 
 const loginGoogle = function (token) {
-    const googleCreds = new AWS.CognitoIdentityCredentials({
-        IdentityPoolId: AWSConfig.poolId,
-        Logins: {
-            'accounts.google.com': token
-         }
+    const newCredentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: AWSConfig.poolId
     });
-    config.credentials = googleCreds
+    newCredentials.params.Logins = {};
+    newCredentials.params.Logins['accounts.google.com'] = token;
+    newCredentials.expired = true;
+    config.credentials = newCredentials
+    // const googleCreds = new AWS.CognitoIdentityCredentials({
+    //     IdentityPoolId: AWSConfig.poolId,
+    //     Logins: {
+    //         'accounts.google.com': token
+    //      }
+    // });
+    // config.credentials = googleCreds
 }
 
 // default is anonymous
@@ -59,21 +66,33 @@ exports._identity = function (onError) {
 
 
 exports._credentials = function (identity) {
-    const params = {
-        IdentityId: identity
-    };
+    // const params = {
+    //     IdentityId: identity
+    // };
+    const credentials = config.credentials;
     return function(onError) {
         return function (onSuccess) {
             return function() {
-                const cognitoIdentity = new AWS.CognitoIdentity();
-                cognitoIdentity.getCredentialsForIdentity(params, function(error, data) {
-                    if (error) {
-                        console.log("error obtaining credentials:" + error )
-                        onError(error)();
+                credentials.refresh(function (err) {
+                    if (err) {
+                        onError(err)();
                         return;
                     }
-                    onSuccess(data.Credentials)();
+                    // console.log("identity id: " + credentials.identityId)
+                    // console.log("access key id: " + credentials.accessKeyId);
+                    // console.log("secret key: " + credentials.secretAccessKey);
+                    // console.log("session token:" + credentials.sessionToken);
+                    onSuccess(credentials)();
                 });
+                // const cognitoIdentity = new AWS.CognitoIdentity();
+                // cognitoIdentity.getCredentialsForIdentity(params, function(error, data) {
+                //     if (error) {
+                //         console.log("error obtaining credentials:" + error )
+                //         onError(error)();
+                //         return;
+                //     }
+                //     onSuccess(data.Credentials)();
+                // });
             };
         };
     };
