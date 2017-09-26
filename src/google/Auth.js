@@ -11,7 +11,6 @@ const params = {
 
 const loader = new LoadGoogleAPI(params);
 
-
 const withAuth = (function () {
     var auth;
     return function (f) {
@@ -29,87 +28,50 @@ const withAuth = (function () {
     }
 })();
 
-exports._updates = function (onUpdate) {
-    return function () {
-        withAuth(function (auth) {
-            function emit() {
+exports._identityToken = function (onError) {
+    return function (onSuccess) {
+        return function() {
+            withAuth(function (auth) {
                 const user = auth.currentUser.get();
                 const status = user.hasGrantedScopes('profile') === true;
-                var event = { authorized: status };
                 if (status) {
-                    const profile = user.getBasicProfile();
-                    event.id = profile.getId();
-                    event.name = profile.getName();
-                    event.token = user.getAuthResponse().id_token;
-                    event.email = profile.getEmail();
+                    console.log("google user is authorized")
+                    onSuccess(user.getAuthResponse().id_token)();
+                } else {
+                    console.log("google user is not authorized")
+                    onError(new Error("not logged in"))();
                 }
-                onUpdate(event)();
-            }
-            auth.isSignedIn.listen(emit);
-            emit();
-            setTimeout(function () {
-                emit();
-            },500);
-        });
+            });
+            return {};
+        };
     };
 };
 
-exports._updName = function (u) { return u.name; };
-exports._updEmail = function (u) { return u.email; };
-exports._updToken = function (u) { return u.token; };
-exports._updAuthorized = function (u) { return u.authorized; };
+exports._showIdentityToken = function (token) { return token; }
 
-// exports._initialize = function (onSuccess) {
+
+// exports._updates = function (onUpdate) {
 //     return function () {
-//         loader.loadGoogleAPI().then(function () {
-//             loader.init().then(function () {
-//                 auth = window.gapi.auth2.getAuthInstance();
-//                 showSigninStatus();
-//                 auth.isSignedIn.listen(showSigninStatus);
-//                 onSuccess()();
-//             });
+//         withAuth(function (auth) {
+//             function emit() {
+//                 const user = auth.currentUser.get();
+//                 const status = user.hasGrantedScopes('profile') === true;
+//                 var event = { authorized: status };
+//                 if (status) {
+//                     const profile = user.getBasicProfile();
+//                     event.id = profile.getId();
+//                     event.name = profile.getName();
+//                     event.token = user.getAuthResponse().id_token;
+//                     event.email = profile.getEmail();
+//                 }
+//                 onUpdate(event)();
+//             }
+//             auth.isSignedIn.listen(emit);
+//             emit();
+//             setTimeout(function () {
+//                 emit();
+//             },500);
 //         });
-//         return {};
 //     };
 // };
 
-
-exports._attachLogin = function (elementId) {
-    return function () {
-        withAuth(function(auth) {
-            auth.attachClickHandler (
-                elementId,
-                {scope: 'profile'},
-                function() {
-                    console.log("signed in from page");
-                },
-                function(msg) {
-                    console.log("problem signing in: " + msg);
-                }
-            );
-        });
-        return {};
-    };
-};
-
-// exports._attachLogin = function (onError) {
-//     return function (onSuccess) {
-//         return function (elementId) {
-//             return function () {
-//                 auth.attachClickHandler(
-//                     'login', {scope: "profile"}, showSigninStatus, showError
-//                 );
-//             };
-//         };
-//     };
-// };
-
-
-// contacts.loadGoogleAPI().then(() => {
-//     contacts.init().then(() => {
-//       window.auth = window.gapi.auth2.getAuthInstance();
-//       auth.isSignedIn.listen(updateSignInStatus);
-//     }).then(() => {
-//       main();
-//     });
-//   })
