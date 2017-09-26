@@ -3,6 +3,7 @@ module UI.Event (Event(..)) where
 import Prelude (class Eq)
 import Data.Show (class Show)
 import Data.Generic (class Generic, gShow, gEq)
+import AWS.IoT
 
 data Event =  Next
             | Previous
@@ -15,12 +16,15 @@ data Event =  Next
             | FetchPresentationsRequest
             | Presentations (Array String)
             | SavePresentationsRequest (Array String)
+            | Logout
+            | Login String String String
+            | NewDevice Device
 
 
-derive instance genericEvent :: Generic Event
+-- derive instance genericEvent :: Generic Event
 
-instance showEvent :: Show Event where
-  show = gShow
+-- instance showEvent :: Show Event where
+--   show = gShow
 
-instance eqEvent :: Eq Event where
-  eq = gEq
+-- instance eqEvent :: Eq Event where
+--   eq = gEq

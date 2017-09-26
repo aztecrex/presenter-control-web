@@ -1,4 +1,4 @@
-module AWS (anonymous, credentials, fetch, save) where
+module AWS (anonymous, credentials, fetch, save, awsLogin) where
 
 import Prelude
 import Control.Monad.Eff(Eff, kind Effect)
@@ -11,6 +11,11 @@ foreign import _anonymous :: forall eff. Eff (aws :: AWS | eff) Unit
 
 anonymous :: forall eff. Aff (aws :: AWS | eff) Unit
 anonymous = makeAff (\_ _ -> _anonymous)
+
+foreign import _login :: forall eff. String -> Eff eff Unit
+
+awsLogin :: forall eff. String -> Eff (aws :: AWS | eff) Unit
+awsLogin = _login
 
 foreign import _identity :: forall eff. (Error -> Eff (aws :: AWS | eff) Unit) -> (String -> Eff (aws :: AWS | eff) Unit) -> Eff (aws :: AWS | eff) Unit
 

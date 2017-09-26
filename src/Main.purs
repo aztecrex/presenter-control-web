@@ -16,13 +16,13 @@ import Pux.Renderer.React (renderToDOM)
 import UI.View (view)
 import UI.Event (Event(..))
 import UI.Control (reduce)
-import Model.State (State, newState, url, page, presentations)
+import Model.State (State, newState, url, page, presentations, maybeDevice)
 import Signal.Channel (CHANNEL)
 import Signal (constant, (~>), runSignal)
-import AWS(fetch, save)
+import AWS(fetch, save, awsLogin)
 import AWS.Types (AWS)
 import AWS.IoT (createDevice, Device, updateDevice)
-import Google.Auth(authUpdates)
+import Google.Auth(authUpdates, AuthUpdate(..))
 
 initialState :: State
 initialState = newState
@@ -37,8 +37,9 @@ update dev url page = do
   liftEff $ updateDevice dev url page
   pure Nothing
 
-stEffects :: forall eff. Device -> State -> Array (Aff (aws :: AWS, exception :: EXCEPTION | eff) (Maybe Event))
-stEffects device s = [update device (s ^. url) (s ^. page)]
+stEffects :: forall eff. Maybe Device -> State -> Array (Aff (aws :: AWS, exception :: EXCEPTION | eff) (Maybe Event))
+stEffects (Just device) s = [update device (s ^. url) (s ^. page)]
+stEffects _ _ = []
 
 requestPresentations :: forall eff. Aff (aws :: AWS, exception :: EXCEPTION | eff) (Maybe Event)
 requestPresentations = do
@@ -50,31 +51,43 @@ savePresentations items = do
   save "presentations.txt" $ intercalate "\n" items
   pure Nothing
 
-makeFoldP :: forall eff. Device -> Event -> State -> EffModel State Event (aws :: AWS, exception :: EXCEPTION | eff)
-makeFoldP _ FetchPresentationsRequest s = {state: reduce FetchPresentationsRequest s, effects: [requestPresentations]}
-makeFoldP _ AddPresentation s = {state: s', effects: [savePresentations (s' ^. presentations)]}
+obtainDevice :: forall eff. String -> Aff (aws :: AWS | eff) (Maybe Event)
+obtainDevice token = do
+  liftEff $ awsLogin token
+  dev <- createDevice
+  pure $ Just $ NewDevice dev
+
+foldp :: forall eff. Event -> State -> EffModel State Event (aws :: AWS, exception :: EXCEPTION | eff)
+foldp FetchPresentationsRequest s = {state: reduce FetchPresentationsRequest s, effects: [requestPresentations]}
+foldp AddPresentation s = {state: s', effects: [savePresentations (s' ^. presentations)]}
   where s' = reduce AddPresentation s
-makeFoldP device Next s = { state: s', effects: stEffects device s' }
+foldp Next s = { state: s', effects: stEffects (s' ^. maybeDevice) s' }
   where s' = reduce Next s
-makeFoldP device Previous s = { state: s', effects: stEffects device s' }
+foldp Previous s = { state: s', effects: stEffects (s' ^. maybeDevice) s' }
   where s' = reduce Previous s
-makeFoldP device Restart s = { state: s', effects: stEffects device s' }
+foldp Restart s = { state: s', effects: stEffects (s' ^. maybeDevice) s' }
   where s' = reduce Restart s
-makeFoldP device ev@(Location _) s = { state: s', effects: stEffects device s' }
+foldp ev@(Location _) s = { state: s', effects: stEffects (s' ^. maybeDevice) s' }
   where s' = reduce ev s
-makeFoldP device ev s = { state: reduce ev s, effects: [] }
+foldp ev@(Login _ _ token) s = {state: s', effects: [obtainDevice token]}
+  where s' = reduce ev s
+foldp ev s = { state: reduce ev s, effects: [] }
+
+authEvent :: AuthUpdate -> Event
+authEvent Signout = Logout
+authEvent (Signin name email token) = Login name email token
 
 main :: Eff (CoreEffects AppEffects) Unit
 main = do
   auths <- authUpdates
-  runSignal $ (map show auths) ~> log
+  let authEvents = map authEvent auths
+  -- runSignal $ (map show authEvents) ~> log
   void $ launchAff $ do
-    device <- createDevice
     eitherApp <- liftEff' $ start
       { initialState
         , view
-        , foldp: makeFoldP device
-        , inputs: [constant FetchPresentationsRequest]
+        , foldp: foldp
+        , inputs: [authEvents]
       }
     case eitherApp of
       Left _ -> pure $ Right unit

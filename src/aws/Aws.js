@@ -14,6 +14,17 @@ const anonymousCredentials = new AWS.CognitoIdentityCredentials({
 const anonymous = function () {
     config.credentials = anonymousCredentials;
 }
+
+const loginGoogle = function (token) {
+    const googleCreds = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: AWSConfig.poolId,
+        Logins: {
+            'accounts.google.com': token
+         }
+    });
+    config.credentials = googleCreds
+}
+
 // default is anonymous
 anonymous();
 
@@ -23,6 +34,13 @@ exports._anonymous = function() {
         anonymous();
     };
 };
+
+exports._login = function (googleToken) {
+    return function () {
+        loginGoogle(googleToken);
+    };
+};
+
 
 exports._identity = function (onError) {
     const credentials = config.credentials;

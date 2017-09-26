@@ -1,6 +1,7 @@
 module Google.Auth (
     authUpdates,
-    AuthUpdate
+    AuthUpdate(..),
+    attachLogin
 ) where
 
 import Prelude
@@ -56,8 +57,7 @@ authUpdates = do
     pure $ subscribe ch
 
 
+foreign import _attachLogin :: forall eff. String -> Eff eff Unit
 
--- foreign import _initialize :: forall eff. (Unit -> Eff eff Unit) -> Eff eff Unit
-
--- initializeGoogle :: forall eff. Aff (aws :: AWS | eff) Unit
--- initializeGoogle = makeAff $ \_ onSuccess -> _initialize onSuccess
+attachLogin :: forall eff. String -> Eff (aws :: AWS | eff) Unit
+attachLogin = _attachLogin

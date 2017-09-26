@@ -47,6 +47,9 @@ exports._updates = function (onUpdate) {
             }
             auth.isSignedIn.listen(emit);
             emit();
+            setTimeout(function () {
+                emit();
+            },500);
         });
     };
 };
@@ -70,6 +73,24 @@ exports._updAuthorized = function (u) { return u.authorized; };
 //     };
 // };
 
+
+exports._attachLogin = function (elementId) {
+    return function () {
+        withAuth(function(auth) {
+            auth.attachClickHandler (
+                elementId,
+                {scope: 'profile'},
+                function() {
+                    console.log("signed in from page");
+                },
+                function(msg) {
+                    console.log("problem signing in: " + msg);
+                }
+            );
+        });
+        return {};
+    };
+};
 
 // exports._attachLogin = function (onError) {
 //     return function (onSuccess) {
