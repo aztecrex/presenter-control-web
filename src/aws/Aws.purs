@@ -1,4 +1,4 @@
-module AWS (anonymous, credentials, fetch, save, awsLogin) where
+module AWS (authorizeGoogleUser, credentials, fetch, save) where
 
 import Prelude
 import Control.Monad.Eff(Eff, kind Effect)
