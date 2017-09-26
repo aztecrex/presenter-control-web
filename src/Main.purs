@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (Unit, bind, discard, ($), pure, void, unit)
+import Prelude (Unit, bind, discard, ($), pure, void, unit, show, map)
 import Data.Maybe (Maybe(..))
 import Data.Either(Either(..))
 import Data.Lens ((^.))
@@ -10,7 +10,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Aff (Aff, launchAff, liftEff')
-import Control.Monad.Eff.Console (CONSOLE)
+import Control.Monad.Eff.Console (CONSOLE, log)
 import Pux (CoreEffects, EffModel, start)
 import Pux.Renderer.React (renderToDOM)
 import UI.View (view)
@@ -18,10 +18,11 @@ import UI.Event (Event(..))
 import UI.Control (reduce)
 import Model.State (State, newState, url, page, presentations)
 import Signal.Channel (CHANNEL)
-import Signal (constant)
+import Signal (constant, (~>), runSignal)
 import AWS(fetch, save)
 import AWS.Types (AWS)
 import AWS.IoT (createDevice, Device, updateDevice)
+import Google.Auth(authUpdates)
 
 initialState :: State
 initialState = newState
@@ -65,6 +66,8 @@ makeFoldP device ev s = { state: reduce ev s, effects: [] }
 
 main :: Eff (CoreEffects AppEffects) Unit
 main = do
+  auths <- authUpdates
+  runSignal $ (map show auths) ~> log
   void $ launchAff $ do
     device <- createDevice
     eitherApp <- liftEff' $ start
