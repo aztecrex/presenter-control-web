@@ -1,19 +1,10 @@
 module Test.Main where
 
-import Prelude
-import Data.Maybe (Maybe(..))
-import Data.Lens
+import Prelude (Unit)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Aff.AVar (AVAR)
 import Test.Unit.Console (TESTOUTPUT)
-import Model.State
-import UI.Event
-import UI.Control
-import Test.Unit.Assert (assert, equal)
-import Test.Unit.Main (runTest)
-import Test.Unit (suite, test)
-
 
 main :: ∀ fx. Eff ( console :: CONSOLE
                   , testOutput :: TESTOUTPUT

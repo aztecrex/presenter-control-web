@@ -11,14 +11,12 @@ module Model.State
 )
 where
 
-import Prelude (class Eq, class Show, map, show, (<<<), (<>), (==), (&&), ($), Unit)
-import Data.Maybe (Maybe(..), maybe)
+import Prelude (class Eq, class Show, Unit, show, (&&), (<<<), (<>), (==))
+import Data.Maybe (Maybe(..))
 import Data.Generic
-import Data.Profunctor.Choice (class Choice)
-import Data.Profunctor.Strong (class Strong)
 import Data.Newtype (class Newtype, unwrap)
 import Data.Symbol (SProxy(..))
-import Data.Lens (Iso', Lens', _Just, iso)
+import Data.Lens (Iso', Lens', iso)
 import Data.Lens.Record (prop)
 
 data User = User Unit

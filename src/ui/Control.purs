@@ -3,8 +3,7 @@ module UI.Control (
 ) where
 
 import Prelude ((#), (<<<))
-import Data.Maybe (Maybe(..))
-import Model.State (State, page, url, presentationInput, presentations, maybeUser, User(..))
+import Model.State (State, page, url, presentationInput, presentations)
 import UI.Event (Event (..))
 import Data.Lens
 
