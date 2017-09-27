@@ -1,15 +1,16 @@
 module UI.View (view) where
 
 import Prelude (const, discard, show, ($), (<>))
-import Data.Maybe (maybe)
+import Data.Maybe (maybe, isJust)
+import Data.Monoid (mempty)
 import Text.Smolder.Markup (text, (#!), (!))
-import Text.Smolder.HTML.Attributes (className, style, value)
+import Text.Smolder.HTML.Attributes (id, className, style, value, href)
 import Data.Foldable (for_)
 import Data.Lens ((^.))
-import Text.Smolder.HTML (div, p, button, br, h2, input)
+import Text.Smolder.HTML (div, p, button, br, h2, input, a)
 import Pux.DOM.Events (onClick, onChange, targetValue)
 import Pux.DOM.HTML (HTML)
-import Model.State (State, presentations, presentationInput)
+import Model.State (State, presentations, presentationInput, maybeUser, User(..))
 import UI.Event(Event(..))
 
 pbutton :: String -> HTML Event
@@ -17,8 +18,8 @@ pbutton url = do
     button ! className "btn" #! onClick (const (Location url)) $ text url
     br
 
-view :: State -> HTML Event
-view state = do
+authorizedView :: State -> HTML Event
+authorizedView state = do
     div $ do
         div $ do
             h2 $ text "Slide"
@@ -33,3 +34,16 @@ view state = do
                 ! value (state ^. presentationInput)
                 #! onChange (\ev -> (PresentationInputChange (targetValue ev)))
             button #! onClick (const AddPresentation) $ text "Add"
+
+unauthorizedView :: State -> HTML Event
+unauthorizedView state = do
+    div $ do
+        p $ do
+            text $ "Not authorized. "
+            a ! href "login.html" $ text "Login here"
+            text "."
+
+view :: State -> HTML Event
+view state = if isJust ( state ^. maybeUser )
+    then authorizedView state
+    else unauthorizedView state

@@ -5,12 +5,15 @@ module Model.State
   page,
   url,
   presentations,
-  presentationInput
+  presentationInput,
+  maybeUser,
+  User(..)
 )
 where
 
-import Prelude (class Eq, class Show, map, show, (<<<), (<>), (==), (&&))
+import Prelude (class Eq, class Show, map, show, (<<<), (<>), (==), (&&), ($), Unit)
 import Data.Maybe (Maybe(..), maybe)
+import Data.Generic
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Data.Newtype (class Newtype, unwrap)
@@ -18,11 +21,21 @@ import Data.Symbol (SProxy(..))
 import Data.Lens (Iso', Lens', _Just, iso)
 import Data.Lens.Record (prop)
 
+data User = User Unit
+
+derive instance genericUser :: Generic User
+
+derive instance eqUser :: Eq User
+
+instance showUser :: Show User where
+  show = gShow
+
 type StateR = {
   _page :: Int,
   _url :: String,
   _presentations :: Array String,
-  _presentationInput :: String
+  _presentationInput :: String,
+  _maybeUser :: Maybe User
 }
 newtype State = State StateR
 
@@ -71,6 +84,12 @@ _presentationInput = prop (SProxy :: SProxy "_presentationInput")
 presentationInput :: Lens' State String
 presentationInput = _record <<< _presentationInput
 
+_maybeUser :: forall r. Lens' { _maybeUser :: (Maybe User) | r } (Maybe User)
+_maybeUser = prop (SProxy :: SProxy "_maybeUser")
+
+maybeUser :: Lens' State (Maybe User)
+maybeUser = _record <<< _maybeUser
+
 newState :: State
 newState = State
   {
@@ -81,5 +100,6 @@ newState = State
     --   "https://raw.githubusercontent.com/aztecrex/presenter-control-web/master/README.md"
     -- ],
     _presentations: [],
-    _presentationInput: ""
+    _presentationInput: "",
+    _maybeUser: Nothing
   }

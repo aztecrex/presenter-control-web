@@ -3,64 +3,63 @@
 const AWS = require('aws-sdk');
 const AWSConfig = require('config/aws-configuration.js')
 
-
 const config = AWS.config;
 config.region = AWSConfig.region;
-
-const anonymousCredentials = new AWS.CognitoIdentityCredentials({
+config.credentials = new AWS.CognitoIdentityCredentials({
     IdentityPoolId: AWSConfig.poolId
 });
 
-const anonymous = function () {
-    config.credentials = anonymousCredentials;
+// foreign import _authorizeGoogleUser :: forall eff. IdentityToken -> Eff eff Unit
+exports._authorizeGoogleUser = function (token) {
+    return function (onError) {
+        return function (onSuccess) {
+            return function() {
+                const credentials = config.credentials;
+                credentials.params.Logins = {
+                    'accounts.google.com': token
+                };
+                credentials.expired = true;
+                console.log("getting credentials");
+                credentials.get(function (error) {
+                    if (error) {
+                        console.log("credentials not retrieved: " + error);
+                        onError(error)();
+                        return;
+                    }
+                    console.log("credentials retrieved, identityId=" + credentials.identityId);
+                    onSuccess(credentials.identityId)();
+                });
+                console.log ("google identity was set");
+                return {};
+            };
+        };
+    }
 }
-// default is anonymous
-anonymous();
 
-
-exports._anonymous = function() {
-    return function() {
-        anonymous();
-    };
-};
-
-exports._identity = function (onError) {
-    const credentials = config.credentials;
+// foreign import _credentials ::
+    // forall eff.
+    // (Error -> Eff eff Unit)
+    // -> (Credentials
+    // -> Eff eff Unit)
+    // -> Eff eff Unit
+exports._credentials = function (onError) {
     return function (onSuccess) {
-        return function() {
-            credentials.get(function(error) {
-                if (error) {
-                    onError(error)();
+        return function () {
+            const credentials = config.credentials;
+            console.log ("refreshing credentials");
+            console.log ("logins: " + credentials.Logins);
+            credentials.refresh(function (err) {
+                if (err) {
+                    console.log ("credentials not retrieved: " + err);
+                    onError(err)();
                     return;
                 }
-                onSuccess(credentials.identityId)();
+                console.log("credentials retieved: " + credentials.accessKeyId);
+                onSuccess(credentials)();
             });
         };
     };
 };
-
-
-exports._credentials = function (identity) {
-    const params = {
-        IdentityId: identity
-    };
-    return function(onError) {
-        return function (onSuccess) {
-            return function() {
-                const cognitoIdentity = new AWS.CognitoIdentity();
-                cognitoIdentity.getCredentialsForIdentity(params, function(error, data) {
-                    if (error) {
-                        console.log("error obtaining credentials:" + error )
-                        onError(error)();
-                        return;
-                    }
-                    onSuccess(data.Credentials)();
-                });
-            };
-        };
-    };
-};
-
 
 const S3 = new AWS.S3();
 

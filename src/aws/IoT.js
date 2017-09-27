@@ -9,10 +9,9 @@ const clientId = function () {
     return "device" + Math.floor(Math.random() * (max - min) + min);
 };
 
-const theTopic = "Banana";
-
 const createDevice = function (credentials, cb) {
     const thing = 'Slides';
+    console.log ("creating device");
     var registered = false
     const shadow = IOT.thingShadow({
         region: AWSConfig.region,
@@ -21,21 +20,34 @@ const createDevice = function (credentials, cb) {
         protocol: 'wss',
         maximumReconnectTimeMs: 8000,
         debug: true,
-        accessKeyId: credentials.AccessKeyId,
-        secretKey: credentials.SecretKey,
-        sessionToken: credentials.SessionToken
+        accessKeyId: credentials.accessKeyId,
+        secretKey: credentials.secretAccessKey,
+        sessionToken: credentials.sessionToken,
     });
+
     shadow.on('connect', function () {
+        console.log ("connected ---------------------------------------------------------------- ");
         if (!registered) {
             shadow.register(thing, {
                 persistentSubscribe: true
             });
-            console.log ("connected");
+            console.log("registered '" + thing + "'");
             registered = true;
+        } else {
+            console.log("already registered '" + thing + "'");
         }
     });
     shadow.on('reconnect', function () {
-        console.log("reconnected")
+        console.log("reconnected, registered=" + registered);
+        // if (!registered) {
+        //     shadow.register(thing, {
+        //         persistentSubscribe: true
+        //     });
+        //     console.log("registered '" + thing + "'");
+        //     registered = true;
+        // } else {
+        //     console.log("already registered '" + thing + "'");
+        // }
     });
 
     return {
