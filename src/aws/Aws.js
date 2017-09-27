@@ -11,15 +11,30 @@ config.credentials = new AWS.CognitoIdentityCredentials({
 
 // foreign import _authorizeGoogleUser :: forall eff. IdentityToken -> Eff eff Unit
 exports._authorizeGoogleUser = function (token) {
-    return function() {
-        const credentials = config.credentials;
-        credentials.Logins = {
-            'accounts.google.com': token
+    return function (onError) {
+        return function (onSuccess) {
+            return function() {
+                const credentials = config.credentials;
+                credentials.params.Logins = {
+                    'accounts.google.com': token
+                };
+                credentials.expired = true;
+                console.log("getting credentials");
+                credentials.get(function (error) {
+                    if (error) {
+                        console.log("credentials not retrieved: " + error);
+                        onError(error)();
+                        return;
+                    }
+                    console.log("credentials retrieved, identityId=" + credentials.identityId);
+                    onSuccess(credentials.identityId)();
+                });
+                console.log ("google identity was set");
+                return {};
+            };
         };
-        credentials.expired = true;
-    };
-};
-
+    }
+}
 
 // foreign import _credentials ::
     // forall eff.
@@ -31,11 +46,15 @@ exports._credentials = function (onError) {
     return function (onSuccess) {
         return function () {
             const credentials = config.credentials;
+            console.log ("refreshing credentials");
+            console.log ("logins: " + credentials.Logins);
             credentials.refresh(function (err) {
                 if (err) {
+                    console.log ("credentials not retrieved: " + err);
                     onError(err)();
                     return;
                 }
+                console.log("credentials retieved: " + credentials.accessKeyId);
                 onSuccess(credentials)();
             });
         };

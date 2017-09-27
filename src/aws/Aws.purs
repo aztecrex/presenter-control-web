@@ -1,4 +1,4 @@
-module AWS (authorizeGoogleUser, credentials, fetch, save) where
+module AWS (authorizeGoogleUser, credentials, fetch, save, AWSIdentity) where
 
 import Prelude
 import Control.Monad.Eff(Eff, kind Effect)
@@ -7,12 +7,12 @@ import Control.Monad.Aff (makeAff, Aff)
 import AWS.Types (AWS, Credentials)
 import Google.Auth (IdentityToken)
 
-
-foreign import _authorizeGoogleUser :: forall eff. IdentityToken -> Eff eff Unit
+foreign import data AWSIdentity :: Type
+foreign import _authorizeGoogleUser :: forall eff. IdentityToken -> (Error -> Eff eff Unit) -> (AWSIdentity -> Eff eff Unit) -> Eff eff Unit
 foreign import _credentials :: forall eff. (Error -> Eff eff Unit) -> (Credentials -> Eff eff Unit) -> Eff eff Unit
 
-authorizeGoogleUser :: forall eff. IdentityToken -> Eff (aws :: AWS | eff) Unit
-authorizeGoogleUser = _authorizeGoogleUser
+authorizeGoogleUser :: forall eff. IdentityToken -> Aff (aws :: AWS | eff) AWSIdentity
+authorizeGoogleUser token = makeAff $ _authorizeGoogleUser token
 
 credentials :: forall eff. Aff (aws :: AWS | eff) Credentials
 credentials = makeAff _credentials

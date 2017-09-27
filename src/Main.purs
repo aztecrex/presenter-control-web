@@ -70,7 +70,7 @@ unauthorizedConfig =
       }
 
 authorizedConfig token = do
-  liftEff $ authorizeGoogleUser token
+  void $ authorizeGoogleUser token
   device <- createDevice
   pure
     { initialState: initialState # maybeUser .~ Just (User unit)
