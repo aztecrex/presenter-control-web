@@ -3,7 +3,8 @@ module UI.Control (
 ) where
 
 import Prelude ((#), (<<<))
-import Model.State (State, page, url, presentationInput, presentations)
+import Data.Maybe(Maybe(..))
+import Model.State (State, page, url, presentationInput, presentations, maybeUser)
 import UI.Event (Event (..))
 import Data.Lens
 
@@ -17,4 +18,5 @@ reduce AddPresentation s = (clearInput <<< appendLocation) s
   where clearInput s' = s' # presentationInput .~ ""
         appendLocation s' = s' # presentations <>~ [s' ^. presentationInput ]
 reduce (Presentations ps) s = s # presentations .~ ps
+reduce Logout s = s # maybeUser .~ Nothing
 reduce _ s = s

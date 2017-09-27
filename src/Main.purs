@@ -19,7 +19,7 @@ import Model.State (State, newState, url, page, presentations, maybeUser, User(.
 import AWS (authorizeGoogleUser, fetch, save)
 import AWS.Types (AWS)
 import AWS.IoT (createDevice, Device, updateDevice)
-import Google.Auth (identityToken)
+import Google.Auth (identityToken, logout)
 
 initialState :: State
 initialState = newState
@@ -42,9 +42,15 @@ savePresentations items = do
   save "presentations.txt" $ intercalate "\n" items
   pure Nothing
 
+effectLogout :: forall eff. Aff (aws :: AWS | eff) (Maybe Event)
+effectLogout = do
+  liftEff logout
+  pure Nothing
+
 
 makeFoldP :: forall eff. Device -> Event -> State -> EffModel State Event (aws :: AWS, exception :: EXCEPTION | eff)
 makeFoldP _ FetchPresentationsRequest s = {state: reduce FetchPresentationsRequest s, effects: [requestPresentations]}
+makeFoldP _ Logout s = { state: reduce Logout s, effects: [effectLogout]}
 makeFoldP _ AddPresentation s = {state: s', effects: [savePresentations (s' ^. presentations)]}
   where s' = reduce AddPresentation s
 makeFoldP device Next s = { state: s', effects: stEffects device s' }

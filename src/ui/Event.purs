@@ -15,6 +15,7 @@ data Event =  Next
             | FetchPresentationsRequest
             | Presentations (Array String)
             | SavePresentationsRequest (Array String)
+            | Logout
 
 derive instance genericEvent :: Generic Event
 
