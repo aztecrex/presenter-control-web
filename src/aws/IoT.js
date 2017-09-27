@@ -10,11 +10,10 @@ const clientId = function () {
 };
 
 const createDevice = function (credentials, cb) {
-    const shadow;
     const thing = 'Slides';
     console.log ("creating device");
     var registered = false
-    shadow = IOT.thingShadow({
+    const shadow = IOT.thingShadow({
         region: AWSConfig.region,
         host: AWSConfig.host,
         clientId: clientId(),
