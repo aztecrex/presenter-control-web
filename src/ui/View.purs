@@ -12,7 +12,6 @@ import Pux.DOM.Events (onClick, onChange, targetValue)
 import Pux.DOM.HTML (HTML)
 import Model.State (State, presentations, presentationInput, maybeUser, User(..))
 import UI.Event(Event(..))
-import Google.Auth (attachLogin)
 
 pbutton :: String -> HTML Event
 pbutton url = do
@@ -22,8 +21,6 @@ pbutton url = do
 authorizedView :: State -> HTML Event
 authorizedView state = do
     div $ do
-        div $ do
-            div ! id "login" $ text $ maybe "" (\(User n _ _)  -> n) (state ^. maybeUser)
         div $ do
             h2 $ text "Slide"
             button ! className "btn-lg" #! onClick (const Previous) $ text "Previous"

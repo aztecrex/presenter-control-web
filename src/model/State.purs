@@ -7,12 +7,11 @@ module Model.State
   presentations,
   presentationInput,
   maybeUser,
-  maybeDevice,
   User(..)
 )
 where
 
-import Prelude (class Eq, class Show, map, show, (<<<), (<>), (==), (&&), ($))
+import Prelude (class Eq, class Show, map, show, (<<<), (<>), (==), (&&), ($), Unit)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Generic
 import Data.Profunctor.Choice (class Choice)
@@ -21,9 +20,8 @@ import Data.Newtype (class Newtype, unwrap)
 import Data.Symbol (SProxy(..))
 import Data.Lens (Iso', Lens', _Just, iso)
 import Data.Lens.Record (prop)
-import AWS.IoT
 
-data User = User String String String
+data User = User Unit
 
 derive instance genericUser :: Generic User
 
@@ -37,8 +35,7 @@ type StateR = {
   _url :: String,
   _presentations :: Array String,
   _presentationInput :: String,
-  _maybeUser :: Maybe User,
-  _maybeDevice :: Maybe Device
+  _maybeUser :: Maybe User
 }
 newtype State = State StateR
 
@@ -93,12 +90,6 @@ _maybeUser = prop (SProxy :: SProxy "_maybeUser")
 maybeUser :: Lens' State (Maybe User)
 maybeUser = _record <<< _maybeUser
 
-_maybeDevice :: forall r. Lens' { _maybeDevice :: (Maybe Device) | r } (Maybe Device)
-_maybeDevice = prop (SProxy :: SProxy "_maybeDevice")
-
-maybeDevice :: Lens' State (Maybe Device)
-maybeDevice = _record <<< _maybeDevice
-
 newState :: State
 newState = State
   {
@@ -110,6 +101,5 @@ newState = State
     -- ],
     _presentations: [],
     _presentationInput: "",
-    _maybeUser: Nothing,
-    _maybeDevice: Nothing
+    _maybeUser: Nothing
   }

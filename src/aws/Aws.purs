@@ -12,7 +12,7 @@ foreign import _authorizeGoogleUser :: forall eff. IdentityToken -> Eff eff Unit
 foreign import _credentials :: forall eff. (Error -> Eff eff Unit) -> (Credentials -> Eff eff Unit) -> Eff eff Unit
 
 authorizeGoogleUser :: forall eff. IdentityToken -> Eff (aws :: AWS | eff) Unit
-authorizeGoogleUser token = makeAff $ _authorizeGoogleUser token
+authorizeGoogleUser = _authorizeGoogleUser
 
 credentials :: forall eff. Aff (aws :: AWS | eff) Credentials
 credentials = makeAff _credentials

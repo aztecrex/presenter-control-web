@@ -16,10 +16,6 @@ data Event =  Next
             | FetchPresentationsRequest
             | Presentations (Array String)
             | SavePresentationsRequest (Array String)
-            | Logout
-            | Login String String String
-            | NewDevice Device
-
 
 -- derive instance genericEvent :: Generic Event
 
