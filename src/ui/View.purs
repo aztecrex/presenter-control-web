@@ -38,11 +38,20 @@ unauthorizedView :: State -> HTML Event
 unauthorizedView state = do
     div $ do
         p $ do
-            text $ "Not authorized. "
-            a ! href "login.html" $ text "Login here"
-            text "."
+            text $ "Login to start."
+
+authControl :: Boolean -> HTML Event
+authControl true = button #! onClick (const Logout) $ text "Logout"
+authControl false = a ! href "login.html" $ text "Login"
 
 view :: State -> HTML Event
-view state = if isJust ( state ^. maybeUser )
-    then authorizedView state
-    else unauthorizedView state
+view state = do
+    let authorized = isJust (state ^. maybeUser)
+    div ! className "navbar navbar-inverse" $ do
+      div ! className "container" $ do
+        a ! className "navbar-brand" ! href "/" $ text "Presentation"
+        div ! className "navbar-brand" ! style "float: right;" $ authControl authorized
+    div ! className "container" $ do
+        if authorized
+            then authorizedView state
+            else unauthorizedView state

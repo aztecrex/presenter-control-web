@@ -1,6 +1,7 @@
 module Google.Auth (
     IdentityToken,
-    identityToken
+    identityToken,
+    logout
 ) where
 
 import Prelude (class Eq, class Show, Unit, const, eq, map, show)
@@ -15,6 +16,7 @@ foreign import data IdentityToken :: Type
 
 foreign import _identityToken :: forall eff. (Error -> Eff eff Unit) -> (IdentityToken -> Eff eff Unit) -> Eff eff Unit
 foreign import _showIdentityToken :: IdentityToken -> String
+foreign import _logout :: forall eff. Eff eff Unit
 
 instance showIdentityToken :: Show IdentityToken where
     show = _showIdentityToken
@@ -25,3 +27,5 @@ instance eqIdentityToken :: Eq IdentityToken where
 identityToken :: forall eff. Aff (aws :: AWS | eff) (Maybe IdentityToken)
 identityToken = map (either (const Nothing) Just) (attempt (makeAff _identityToken))
 
+logout :: forall eff. Eff (aws :: AWS | eff) Unit
+logout = _logout

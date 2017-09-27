@@ -49,6 +49,12 @@ exports._identityToken = function (onError) {
 
 exports._showIdentityToken = function (token) { return token; }
 
+exports._logout = function() {
+    withAuth(function (auth) {
+        auth.signOut();
+    });
+    return {};
+}
 
 // exports._updates = function (onUpdate) {
 //     return function () {
