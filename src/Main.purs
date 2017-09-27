@@ -80,7 +80,7 @@ authorizedConfig token = do
     }
 
 
-main :: forall eff. Eff (CoreEffects (exception :: EXCEPTION, console :: CONSOLE, aws :: AWS, channel :: CHANNEL | eff)) Unit
+main :: Eff (CoreEffects (aws :: AWS, exception :: EXCEPTION, exception :: EXCEPTION)) Unit
 main = do
   void $ launchAff $ do
     maybeAuthorized <- identityToken
