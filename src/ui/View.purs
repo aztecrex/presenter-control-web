@@ -1,16 +1,15 @@
 module UI.View (view) where
 
-import Prelude (const, discard, show, ($), (<>))
-import Data.Maybe (maybe, isJust)
-import Data.Monoid (mempty)
+import Prelude (const, discard, ($))
+import Data.Maybe (isJust)
 import Text.Smolder.Markup (text, (#!), (!))
-import Text.Smolder.HTML.Attributes (id, className, style, value, href)
+import Text.Smolder.HTML.Attributes (className, href, style, value)
 import Data.Foldable (for_)
 import Data.Lens ((^.))
 import Text.Smolder.HTML (div, p, button, br, h2, input, a)
 import Pux.DOM.Events (onClick, onChange, targetValue)
 import Pux.DOM.HTML (HTML)
-import Model.State (State, presentations, presentationInput, maybeUser, User(..))
+import Model.State (State, maybeUser, presentationInput, presentations)
 import UI.Event(Event(..))
 
 pbutton :: String -> HTML Event

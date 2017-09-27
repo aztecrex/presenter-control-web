@@ -1,12 +1,9 @@
 module AWS.IoT (createDevice, Device, updateDevice) where
 
-import Prelude (Unit, bind, discard, pure, void, ($))
+import Prelude (Unit, bind, ($))
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Aff (Aff, launchAff)
-import Signal (Signal, runSignal, (~>))
-import Signal.Channel (CHANNEL, channel, send, subscribe)
+import Control.Monad.Aff (Aff)
 import AWS.Types (AWS, Credentials)
 import AWS (credentials)
 

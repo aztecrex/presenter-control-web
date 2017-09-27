@@ -3,14 +3,13 @@ module Google.Auth (
     identityToken
 ) where
 
-import Prelude
-import Data.Maybe
-import Data.Either
-import AWS.Types
-import Google.Auth
-import Control.Monad.Eff
-import Control.Monad.Eff.Exception
-import Control.Monad.Aff
+import Prelude (class Eq, class Show, Unit, const, eq, map, show)
+import Data.Maybe (Maybe(..))
+import Data.Either (either)
+import AWS.Types (AWS)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Exception (Error)
+import Control.Monad.Aff (Aff, attempt, makeAff)
 
 foreign import data IdentityToken :: Type
 
